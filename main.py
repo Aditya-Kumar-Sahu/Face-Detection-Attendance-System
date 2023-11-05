@@ -297,7 +297,7 @@ print("Encoding Completed..")
 
 # GUIIIII
 
-imag = tk.PhotoImage(file=r"C:\Users\santa\Downloads\Telegram Desktop\Face_Recognition-main\other_files\bg4.png")
+imag = tk.PhotoImage(file=r"other_files\bg4.png")
 
 frame = cstk.CTkFrame(master=root)
 frame.pack(padx=60,pady=20,fill="both",expand=True)
