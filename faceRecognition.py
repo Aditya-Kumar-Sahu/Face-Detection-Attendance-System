@@ -13,7 +13,7 @@ from tkinter import filedialog, PhotoImage
 
 # =======================================Paths===================================================== #
 
-path = "ImagesAttendance"
+img_dir_path = r"ImagesAttendance"
 only_name = r"only_name"
 attend_csv_path = r"Attendance.csv"
 
@@ -26,7 +26,7 @@ global encodeList
 encodeList=[]
 filesz=tuple()
 image_names = []  # stores people's namesz
-mylist = os.listdir(path)  # lists all the images in dir
+mylist = os.listdir(img_dir_path)  # lists all the images in dir
 savedImg = []
 global attend_dict
 attend_dict={}
@@ -38,21 +38,51 @@ del_ind=[]
 # =======================================Accessing Image========================================== #
 
 def access():
+    """
+    Loads images and their respective names from the specified directory (path).
+    Reads images from the 'ImagesAttendance' directory, converting them to numpy arrays for facial recognition purposes.
+    Extracts the base names of the images and stores them in the 'image_names' variable.
+
+    Returns:
+    - images: List of loaded images converted to numpy arrays.
+    - image_names: List containing the base names of the loaded images for reference.
+
+    Note: This function relies on the 'path' variable pointing to the 'ImagesAttendance' directory.
+    """
     global images,image_names
     for cl in mylist:
-        curImg = cv2.imread(f'{path}/{cl}')
+        curImg = cv2.imread(f'{img_dir_path}/{cl}')
         images.append(curImg)
         image_names.append(os.path.splitext(cl)[0]) #root path of name [0] ext path [1]
     print(image_names)
     image_names2 = image_names[:]
 
 def clean():
+    """
+    Clears the contents of the 'only_name' directory.
+
+    This function is intended to empty the directory used to store individual names extracted from images for facial recognition.
+
+    Note: It assumes the existence of the 'only_name' directory in the current working environment.
+    """
     for f in os.listdir(only_name):
         os.remove(fr"{only_name}\{f}")
 
 # ================================Save the Captured Image========================================= #
 
 def save_img(imagesz,nami):
+    """
+    Saves the captured image represented by the 'imagesz' numpy array with the given name 'nami'.
+
+    Parameters:
+    - imagesz: Numpy array representing the captured image.
+    - nami: Name assigned to the captured image.
+
+    Checks if the provided name 'nami' is not already in the 'only_name' directory. If the name is not present,
+    it saves the image as a file with the provided name in the 'only_name' directory.
+
+    Note: The function relies on the existence of the 'only_name' directory for storing the captured images.
+    """
     savedImg=os.listdir(only_name)
     if nami not in savedImg:
         cv2.imwrite(rf"{only_name}+\{nami}.jpg", imagesz)
@@ -60,6 +90,20 @@ def save_img(imagesz,nami):
 # =========================================Image Encoding========================================== #
 
 def find_encodings(images):
+    """
+    Encodes facial features from a list of images.
+
+    Parameters:
+    - images: List containing images in the form of numpy arrays.
+
+    Utilizes the 'face_recognition' library to detect facial locations and encode facial features in the provided images.
+    It extracts the facial encodings for all detected faces in the images and constructs a list of encodings.
+
+    Returns:
+    - encodeList: List of facial encodings for the detected faces in the input images.
+
+    Note: This function depends on the 'face_recognition' library for facial detection and encoding.
+    """
     encodeList = []
     for img in images:
         face_locations = face_recognition.face_locations(img)  # Find face locations
@@ -74,6 +118,18 @@ def find_encodings(images):
 # =======================================Marking Attendance======================================= #
 
 def markAttendance(name):
+    """
+    Records the attendance of a person by marking their entry time or updating their exit time in the 'Attendance.csv' file.
+
+    Parameters:
+    - name: Name of the person whose attendance is being recorded.
+
+    This function updates the 'Attendance.csv' file by marking the entry time if the person's name is not already
+    present in the attendance record. If the person's name already exists in the record, it updates their exit time.
+    The time stamps are recorded in a specific format within the CSV file.
+
+    Note: The function relies on the 'Attendance.csv' file for attendance record keeping.
+    """
     print(name, "attended")
 
     with open("Attendance.csv", 'r+') as f:
@@ -97,8 +153,19 @@ def markAttendance(name):
 # ===============================================Camera Analysis================================== #
 
 def webcam_scan():
-    cap = cv2.VideoCapture(0) # starts video capture through webcam
+    """
+    Initiates the webcam for real-time facial recognition and attendance marking.
 
+    Utilizes the system's webcam to capture live video feed for facial detection and recognition.
+    It detects faces in the video feed, matches them with known faces from loaded images, and marks the attendance
+    for recognized individuals in real-time. It displays the video feed with detected faces and respective names.
+
+    The function continues to capture and analyze the webcam feed until the 'q' key is pressed.
+
+    Note: This function relies on the 'face_recognition' library, OpenCV, and other related libraries for facial detection
+    and marking attendance based on the recognized faces in the video feed.
+    """
+    cap = cv2.VideoCapture(0) # starts video capture through webcam
     while True:
         # img = numpy array  ,  succces= if loaded or not
         success,img = cap.read()
@@ -165,6 +232,17 @@ def webcam_scan():
 # ============================================Attendance on File============================================== #
 
 def attendance():
+    """
+    Manages and updates the attendance record in the 'Attendance.csv' file.
+
+    This function prepares and manages the content of the 'Attendance.csv' file by formatting the entries
+    for each individual present. It calculates the time spent based on entry and exit times.
+
+    Returns:
+    - The 'Attendance.csv' file is updated with individual attendance entries and time spent.
+
+    Note: The function relies on the 'Attendance.csv' file for attendance record management.
+    """
     ff = open("Attendance.csv", 'w+')
     ss = ""
     try:
@@ -196,6 +274,15 @@ def attendance():
 
 
 def open_images_to_delete():
+    """
+    Allows the user to select and delete image files from the 'ImagesAttendance' directory.
+
+    Utilizes a file dialog to enable the selection of image files for deletion. The function presents a file dialog window,
+    allowing the user to choose image files. Once selected, the chosen image files are deleted from the 'ImagesAttendance'
+    directory. The function also updates the 'image_names' list by marking the deleted images as 'unknown'.
+
+    Note: This function depends on the 'ImagesAttendance' directory for managing image files.
+    """
     L1 = image_names
     L2 = []
     li2 = os.listdir(r"ImagesAttendance")
@@ -223,6 +310,15 @@ def open_images_to_delete():
 # =========================================================GUI=================================================#
 
 def delete_a_face():
+    """
+    Opens a separate window to manage and delete image files associated with known faces.
+
+    Initiates a new GUI window allowing the user to interact with the 'open_images_to_delete()' function.
+    The function provides an interface for selecting and deleting specific image files linked to known faces.
+    Upon selection, the chosen image files are deleted, and their corresponding names in the 'image_names' list are updated to 'unknown'.
+
+    Note: This function is dependent on 'open_images_to_delete()' for the actual deletion and name updating process.
+    """
     root1 = tk.Toplevel()
     root1.geometry("600x600")
     root1.title("delete")
@@ -234,13 +330,37 @@ def delete_a_face():
     root1.mainloop()
 
 def show():
+    """
+    Opens the directory where images of known faces are stored.
+
+    This function opens the directory location where images associated with known faces are stored.
+    It enables the user to view the images related to recognized individuals for reference or management purposes.
+
+    Note: The function's behavior depends on the system's default file viewer to display the contents of the 'ImagesAttendance' directory.
+    """
     os.startfile(r"only_name")
 
 def know_faces():
+    """
+    Opens the directory containing images of known faces for reference.
+
+    This function initiates the opening of the directory location where images of known faces are stored.
+    It allows users to access and view images associated with recognized individuals for reference purposes.
+
+    Note: The function depends on the system's default file viewer to display the contents of the 'ImagesAttendance' directory.
+    """
     os.startfile(r"ImagesAttendance")
 
 def about():
-    os.startfile(r"other_files\last.png")
+    """
+    Opens and displays an 'about' image or file for reference.
+
+    This function initiates the opening and display of an 'about' image or file for reference or informational purposes.
+    It allows users to access specific content related to the system or application.
+
+    Note: The function's behavior relies on the system's default application for handling the file type specified in the path.
+    """
+    os.startfile(r"other_files\about.png")
 
 clean() # empty the known images folder
 access() # get the names of images
@@ -253,7 +373,7 @@ root = cstk.CTk()
 root.geometry("1320x720")
 root.title("Facial Recognition System")
 
-imag = tk.PhotoImage(file=r"C:\Users\santa\OneDrive\Desktop\Minor-sem5\other_files\bg4.png")
+imag = tk.PhotoImage(file=r"other_files\bg4.png")
 
 frame = cstk.CTkFrame(master=root)
 frame.pack(padx=60,pady=20,fill="both",expand=True)
